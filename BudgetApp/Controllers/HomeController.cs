@@ -17,6 +17,7 @@ namespace BudgetApp.Controllers
         [HttpGet("")]
         public IActionResult Index()
         {
+            TempData["WTF"] = "WTF";
             return View();
         }
         
@@ -29,7 +30,10 @@ namespace BudgetApp.Controllers
         [HttpGet("error")]
         public IActionResult Error()
         {
-            return View(new ErrorViewModel { Message = TempData["Error"].ToString() });
+            return View(new ErrorViewModel
+            {
+                Message = TempData.ContainsKey("Error") ? TempData["Error"].ToString() : "Przepraszamy za utrudnienia."
+            });
         }
     }
 }

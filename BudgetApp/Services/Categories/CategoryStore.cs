@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
-using BudgetApp.Common;
 using BudgetApp.Common.Identity;
+using BudgetApp.Common.Results;
 using BudgetApp.Data;
 using BudgetApp.Data.Models;
 using BudgetApp.ViewModels.Expenses.Input;
@@ -20,12 +20,12 @@ namespace BudgetApp.Services.Categories
             _currentUser = currentUser;
         }
 
-        public int Add(AddCategoryViewModel model)
+        public Result<int> Add(AddCategoryViewModel model)
         {
             var userCategories = _db.ExpenseCategories.Where(c => c.UserId == _currentUser.Id).ToList();
 
             if (userCategories.Any(c => c.Name.Equals(model.Name, StringComparison.InvariantCultureIgnoreCase)))
-                throw new BudgetAppException(ErrorCode.NotValid, "Kategoria o tej nazwie już istnieje.");
+                return Result.NotValid("Kategoria o tej nazwie już istnieje.");
 
             var category = new ExpenseCategory
             {
@@ -36,26 +36,28 @@ namespace BudgetApp.Services.Categories
             _db.ExpenseCategories.Add(category);
             _db.SaveChanges();
 
-            return category.Id;
+            return Result.Ok(category.Id);
         }
 
-        public void Remove(int categoryId)
+        public Result Remove(int categoryId)
         {
             var category = _db.ExpenseCategories
                 .Include(c => c.Expenses)
                 .FirstOrDefault(e => e.Id == categoryId);
             
             if (category is null)
-                throw new BudgetAppException(ErrorCode.NotValid, "Kategoria nie istnieje.");
+                return Result.NotValid("Kategoria nie istnieje.");
             
             if (category.UserId != _currentUser.Id)
-                throw new BudgetAppException(ErrorCode.Forbidden, "Nie możesz usunąć kategorii nienależącej do Ciebie.");
+                return Result.NotAuthorized("Nie możesz usunąć kategorii nienależącej do Ciebie.");
             
             if (category.Expenses.Any())
-                throw new BudgetAppException(ErrorCode.NotValid, "Musisz usunąć wydatki przypisane do tej kategorii przed jej usunięciem.");
+                return Result.NotValid("Musisz usunąć wydatki przypisane do tej kategorii przed jej usunięciem.");
 
             _db.ExpenseCategories.Remove(category);
             _db.SaveChanges();
+            
+            return Result.Ok();
         }
     }
 }

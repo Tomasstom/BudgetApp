@@ -9,6 +9,7 @@
         <form asp-route-returnUrl="@ViewBag.ReturnUrl" method="post">
             <h4>@ViewData["Title"]</h4>
             <hr />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Email"></label>
                 <input asp-for="Email" class="form-control" />

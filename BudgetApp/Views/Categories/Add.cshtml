@@ -9,6 +9,7 @@
         <form id="account" method="post">
             <h4>@ViewData["Title"]</h4>
             <hr />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Name"></label>
                 <input asp-for="Name" class="form-control" />

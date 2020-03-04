@@ -1,27 +1,41 @@
-﻿@model IEnumerable<BudgetApp.ViewModels.Expenses.Output.CategoryViewModel>
+﻿@using BudgetApp.ViewModels.Expenses.Input
+@model IEnumerable<BudgetApp.ViewModels.Expenses.Output.CategoryViewModel>
 
 @{
     ViewData["Title"] = "Kategorie";
 }
 
-<h1>Kategorie</h1>
-
-<div class="row">
-    <div class="col">
+<div class="row justify-content-center">
+    <div class="col col-sm-8">
+        <h1>Kategorie</h1>
         @if (!Model.Any())
         {
             <p>Nie znaleziono żadnych kategorii</p>
         }
         else
         {
-            <ul class="list-group">
+            <ul class="list-group mb-5">
                 @foreach (var category in Model)
                 {
-                    <li class="list-group-item">@category.Name</li>
+                    <li class="list-group-item" data-category-id="@category.Id">
+                        <div class="d-flex justify-content-between">
+                            <span>@category.Name</span>
+                            <span>
+                                <i class="material-icons text-danger pointer ml-2" data-delete-category>delete</i>
+                            </span>
+                        </div>
+                    </li>
                 }
             </ul>
         }
+        <a class="btn btn-primary" asp-action="Add"><i class="material-icons">create</i> Nowa kategoria</a>
     </div>
 </div>
 
-<a class="btn btn-primary mt-3" asp-controller="Categories" asp-action="Add">Nowa kategoria</a>
+@Html.AntiForgeryToken()
+
+@section Scripts
+{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/5.4.0/bootbox.min.js"></script>
+    <script src="js/categories.js"></script>
+}

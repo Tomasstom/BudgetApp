@@ -1,6 +1,6 @@
 ﻿using System;
-using BudgetApp.Common;
 using BudgetApp.Common.Identity;
+using BudgetApp.Common.Results;
 using BudgetApp.Data;
 using BudgetApp.Data.Models;
 using BudgetApp.ViewModels.Expenses.Input;
@@ -18,15 +18,15 @@ namespace BudgetApp.Services.Expenses
             _currentUser = currentUserContext;
         }
 
-        public int Add(AddExpenseViewModel model)
+        public Result<int> Add(AddExpenseViewModel model)
         {
             var category = _db.ExpenseCategories.Find(model.CategoryId);
             
             if (category is null)
-                throw new BudgetAppException(ErrorCode.NotValid, "Kategoria nie istnieje.");
+                return Result.NotValid("Kategoria nie istnieje.");
             
             if (category.UserId != _currentUser.Id)
-                throw new BudgetAppException(ErrorCode.NotValid, "Ta kategoria nie należy do Ciebie.");
+                return Result.NotValid("Ta kategoria nie należy do Ciebie.");
             
             var expense = new Expense
             {
@@ -40,21 +40,50 @@ namespace BudgetApp.Services.Expenses
             _db.Expenses.Add(expense);
             _db.SaveChanges();
 
-            return expense.Id;
+            return Result.Ok(expense.Id);
         }
 
-        public void Remove(int expenseId)
+        public Result Edit(EditExpenseViewModel model)
+        {
+            var expense = _db.Expenses.Find(model.ExpenseId);
+            var category = _db.ExpenseCategories.Find(model.CategoryId);
+            
+            if (expense is null)
+                return Result.NotValid("Wydatek nie został znaleziony.");
+            
+            if (expense.UserId != _currentUser.Id)
+                return Result.NotValid("Ten wydatek nie należy do Ciebie.");
+            
+            if (category is null)
+                return Result.NotValid("Kategoria nie istnieje.");
+            
+            if (category.UserId != _currentUser.Id)
+                return Result.NotValid("Ta kategoria nie należy do Ciebie.");
+
+            expense.Name = model.Name;
+            expense.Value = model.Value;
+            expense.DateTime = model.DateTime ?? DateTime.UtcNow;
+            expense.CategoryId = category.Id;
+
+            _db.SaveChanges();
+            
+            return Result.Ok();
+        }
+        
+        public Result Remove(int expenseId)
         {
             var expense = _db.Expenses.Find(expenseId);
             
             if (expense is null)
-                throw new BudgetAppException(ErrorCode.NotValid, "Wydatek nie został znaleziony.");
+                return Result.NotValid("Wydatek nie został znaleziony.");
             
             if (expense.UserId != _currentUser.Id)
-                throw new BudgetAppException(ErrorCode.Forbidden, "Ten wydatek nie został dodany przez Ciebie.");
+                return Result.NotAuthorized("Ten wydatek nie został dodany przez Ciebie.");
             
             _db.Expenses.Remove(expense);
             _db.SaveChanges();
+            
+            return Result.Ok();
         }
     }
 }

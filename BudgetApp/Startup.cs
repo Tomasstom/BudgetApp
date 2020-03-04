@@ -5,11 +5,12 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using BudgetApp.Data;
 using BudgetApp.Data.Models;
-using BudgetApp.Infrastructure.Web;
+using BudgetApp.Infrastructure.Web.Binders;
+using BudgetApp.Infrastructure.Web.Middleware;
 using BudgetApp.Services.Auth;
 using BudgetApp.Services.Categories;
 using BudgetApp.Services.Expenses;
-using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,15 +30,19 @@ namespace BudgetApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
+                options.CheckConsentNeeded = context => true;
+                options.MinimumSameSitePolicy = SameSiteMode.None;
+            });
+            
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseInMemoryDatabase("BudgetApp"));
+                options.UseSqlite("Data Source=app.db"));
             services.AddIdentity<User, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
-            services.AddControllersWithViews(config => config.ModelBinderProviders.Insert(0, new InvariantDecimalModelBinderProvider()))
-                .AddRazorRuntimeCompilation();
-            services.AddRazorPages();
-           
-           services.Configure<IdentityOptions>(options =>
+
+            services.Configure<IdentityOptions>(options =>
            {
                // Password settings.
                options.Password.RequireDigit = false;
@@ -72,6 +77,14 @@ namespace BudgetApp
            services.AddScoped<ExpenseReader>();
            services.AddScoped<CategoryReader>();
            services.AddScoped<RegistrationService>();
+
+           services.AddSession();
+            
+           services.AddControllersWithViews(config =>
+               {
+                   config.ModelBinderProviders.Insert(0, new InvariantDecimalModelBinderProvider());
+               })
+               .AddRazorRuntimeCompilation();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -79,23 +92,27 @@ namespace BudgetApp
         {
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
                 app.UseDatabaseErrorPage();
             }
             else
             {
-                app.UseMiddleware(typeof(ExceptionMiddleware));
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+            
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
+            
             app.UseRouting();
 
             app.UseAuthentication();
             app.UseAuthorization();
-
+            
+            app.UseCookiePolicy();
+            app.UseSession();
+            
+            app.UseMiddleware(typeof(ExceptionMiddleware));
+            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

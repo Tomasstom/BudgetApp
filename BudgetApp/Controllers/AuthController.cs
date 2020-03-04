@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using BudgetApp.Data.Models;
+using BudgetApp.Infrastructure.Web.Filters;
 using BudgetApp.Services.Auth;
 using BudgetApp.ViewModels.Auth;
 using Microsoft.AspNetCore.Identity;
@@ -8,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BudgetApp.Controllers
 {
     [Route("auth")]
-    public class AuthController : Controller
+    public class AuthController : BaseController
     {
         private readonly SignInManager<User> _signInManager;
         private readonly RegistrationService _registrationService;
@@ -20,6 +21,7 @@ namespace BudgetApp.Controllers
         }
 
         [HttpGet("login")]
+        [ImportModelState]
         public IActionResult Login(string returnUrl)
         {
             ViewBag.ReturnUrl = returnUrl;
@@ -27,14 +29,14 @@ namespace BudgetApp.Controllers
         }
 
         [HttpGet("register")]
+        [ImportModelState]
         public IActionResult Register() => View();
 
         [HttpPost("login")]
+        [ValidateModelState]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model, string returnUrl)
         {
-            if (!ModelState.IsValid)
-                return View(model);
-            
             var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, true);
 
             returnUrl = returnUrl ?? Url.Content("~/");
@@ -49,14 +51,13 @@ namespace BudgetApp.Controllers
         }
 
         [HttpPost("register")]
+        [ValidateModelState]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
-            
-            await _registrationService.Register(model);
+            var result = await _registrationService.Register(model);
 
-            return RedirectToAction(nameof(ExpensesController.List), "Expenses");
+            return MapToResponse(result, () => RedirectToAction(nameof(ExpensesController.Search), "Expenses"));
         }
 
         [HttpPost("logout")]

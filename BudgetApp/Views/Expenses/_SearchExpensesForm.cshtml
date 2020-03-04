@@ -1,0 +1,22 @@
+﻿@using BudgetApp.ViewModels.Expenses
+@model BudgetApp.ViewModels.Expenses.Input.SearchExpensesViewModel
+
+<form>
+    <div class="form-group">
+        <label asp-for="Order"></label>
+        <select asp-for="Order" asp-items="@Html.GetEnumSelectList<ExpenseOrder>()" class="form-control"></select>
+    </div>
+    <div class="form-group">
+        <label asp-for="TimeSpan"></label>
+        <select asp-for="TimeSpan" asp-items="@Html.GetEnumSelectList<ExpenseTimeSpan>()" class="form-control"></select>
+    </div>
+    <div class="form-group">
+        <label asp-for="CategoryId"></label>
+        <select asp-for="CategoryId" asp-items="Model.Categories" class="form-control">
+            <option>Wybierz</option>
+        </select>
+    </div>
+    <div class="form-group mt-4">
+        <button type="submit" class="btn btn-primary"><i class="material-icons">search</i> Szukaj</button>
+    </div>
+</form>

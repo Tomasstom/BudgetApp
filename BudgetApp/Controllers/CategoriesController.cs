@@ -1,4 +1,5 @@
-﻿using BudgetApp.Services.Categories;
+﻿using BudgetApp.Infrastructure.Web.Filters;
+using BudgetApp.Services.Categories;
 using BudgetApp.ViewModels.Expenses.Input;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,7 +8,7 @@ namespace BudgetApp.Controllers
 {
     [Authorize]
     [Route("categories")]
-    public class CategoriesController : Controller
+    public class CategoriesController : BaseController
     {
         private readonly CategoryStore _categoryStore;
         private readonly CategoryReader _categoryReader;
@@ -19,20 +20,19 @@ namespace BudgetApp.Controllers
         }
 
         [HttpGet("add")]
+        [ImportModelState]
         public IActionResult Add()
         {
             return View();
         }
 
         [HttpPost("add")]
+        [ValidateModelState]
         [ValidateAntiForgeryToken]
         public IActionResult Add(AddCategoryViewModel model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
-            
-            _ = _categoryStore.Add(model);
-            return RedirectToAction(nameof(List));
+            var result = _categoryStore.Add(model);
+            return MapToResponse(result, () => RedirectToAction(nameof(List)));
         }
         
         [HttpGet("")]
@@ -40,6 +40,14 @@ namespace BudgetApp.Controllers
         {
             var expenses = _categoryReader.GetAll();
             return View(expenses);
+        }
+        
+        [HttpDelete("{categoryId}")]
+        public IActionResult Remove(int categoryId)
+        {
+            var result = _categoryStore.Remove(categoryId);
+
+            return MapToResponse(result, NoContent);
         }
     }
 }

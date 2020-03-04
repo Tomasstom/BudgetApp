@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.Extensions.Logging;
 
-namespace BudgetApp.Infrastructure.Web
+namespace BudgetApp.Infrastructure.Web.Binders
 {
     public class InvariantDecimalModelBinderProvider : IModelBinderProvider
     {

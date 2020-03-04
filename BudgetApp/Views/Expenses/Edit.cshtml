@@ -1,7 +1,7 @@
-﻿@model BudgetApp.ViewModels.Expenses.Input.AddExpenseViewModel
+﻿@model BudgetApp.ViewModels.Expenses.Input.EditExpenseViewModel
 
 @{
-    ViewData["Title"] = "Nowy wydatek";
+    ViewData["Title"] = "Edycja wydatku";
 }
 
 <div class="row justify-content-center">
@@ -22,7 +22,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="DateTime"></label>
-                <input asp-for="DateTime" class="form-control" />
+                <input type="date" asp-for="DateTime" class="form-control" />
                 <span asp-validation-for="DateTime" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -31,7 +31,7 @@
                 <span asp-validation-for="CategoryId" class="text-danger"></span>
             </div>
             <div class="form-group mt-2">
-                <button type="submit" class="btn btn-primary">Dodaj</button>
+                <button type="submit" class="btn btn-primary">Edytuj</button>
             </div>
         </form>
     </div>

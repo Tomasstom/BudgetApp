@@ -1,0 +1,99 @@
+﻿@using BudgetApp.ViewModels.Expenses.Input
+@model BudgetApp.ViewModels.Expenses.Output.ExpensePageViewModel
+
+@{
+    ViewData["Title"] = "Wydatki";
+}
+
+<h1>Wydatki</h1>
+
+<div class="row mb-2">
+    <div class="col-lg-2">
+        @await Html.PartialAsync("_SearchExpensesForm", new SearchExpensesViewModel()
+        {
+            Order = Model.Order,
+            TimeSpan = Model.TimeSpan,
+            CategoryId = Model.CategoryId,
+            Categories = Model.Categories
+        })
+    </div>
+    <div class="col-lg-10">
+        @if (!Model.Expenses.Any())
+        {
+            <p>Nie znaleziono żadnych wydatków</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">Nazwa</th>
+                        <th scope="col">Wartość</th>
+                        <th scope="col">Data</th>
+                        <th scope="col">Kategoria</th>
+                        <th scope="col"></th>
+                        <th scope="col"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var expense in Model.Expenses)
+                    {
+                        <tr data-expense-id="@expense.Id" class="col">
+                            <td class="col-4">@expense.Name</td>
+                            <td class="text-danger col-2">@expense.Value.ToString("0.00")</td>
+                            <td class="col-2">@expense.DateTime.ToString("yyyy-MM-dd")</td>
+                            <td class="col-2">@expense.CategoryName</td>
+                            <td class="px-0 col-1"><a asp-action="Edit" asp-route-expenseId="@expense.Id"><i class="material-icons pointer">edit</i></a></td>
+                            <td class="px-0 col-1"><i class="material-icons text-danger pointer" data-delete-expense>delete</i></td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+            <nav class="d-flex justify-content-end mt-2">
+                @if (Model.PageNumber > 1)
+                {
+                    <a
+                        class="btn btn-secondary"
+                        asp-action="Search"
+                        asp-route-order="@Model.Order"
+                        asp-route-timeSpan="@Model.TimeSpan"
+                        asp-route-categoryId="@Model.CategoryId"
+                        asp-route-pageSize="@Model.PageSize"
+                        asp-route-pageNumber="@(Model.PageNumber - 1)"
+                    >
+                        <i class="material-icons align-middle">arrow_back</i>
+                    </a>
+                }
+                @if (Model.Expenses.Count() == Model.PageSize)
+                {
+                    <a
+                        class="btn btn-secondary ml-2"
+                        asp-action="Search"
+                        asp-route-order="@Model.Order"
+                        asp-route-timeSpan="@Model.TimeSpan"
+                        asp-route-categoryId="@Model.CategoryId"
+                        asp-route-pageSize="@Model.PageSize"
+                        asp-route-pageNumber="@(Model.PageNumber + 1)"
+                    >
+                        <i class="material-icons align-middle">arrow_forward</i>
+                    </a>
+                }
+            </nav> 
+        }
+    </div>
+</div>
+
+<a class="btn btn-primary" asp-controller="Expenses" asp-action="Add">
+    <i class="material-icons">create</i> Nowy wydatek
+</a>
+<a class="btn ml-sm-2" asp-controller="Categories" asp-action="List">Kategorie</a>
+
+@Html.AntiForgeryToken()
+
+@section Scripts
+{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/5.4.0/bootbox.min.js"></script>
+    <script src="~/js/expenses.js"></script>
+}

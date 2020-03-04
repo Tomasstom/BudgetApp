@@ -22,13 +22,8 @@ namespace BudgetApp
             using (var scope = host.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
-                var registrationService = scope.ServiceProvider.GetService<RegistrationService>();
-                _ = registrationService.Register(new RegisterViewModel
-                {
-                    Email = "test@test.com",
-                    Password = "Secret123",
-                    ConfirmPassword = "Secret123"
-                });
+                var db = scope.ServiceProvider.GetService<ApplicationDbContext>();
+                db.Database.EnsureCreated();
             }
             
             host.Run();

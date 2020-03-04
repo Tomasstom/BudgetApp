@@ -31,9 +31,13 @@ namespace BudgetApp.Services.Categories
                 .ToList();
         }
 
-        public SelectList GetSelectList()
+        public IEnumerable<SelectListItem> GetSelectList()
         {
-            return new SelectList(GetAll(), nameof(CategoryViewModel.Id), nameof(CategoryViewModel.Name));
+            return GetAll().Select(c => new SelectListItem
+            {
+                Text = c.Name,
+                Value = c.Id.ToString()
+            });
         }
     }
 }
