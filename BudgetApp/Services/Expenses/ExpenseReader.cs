@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BudgetApp.Common.Identity;
 using BudgetApp.Data;
+using BudgetApp.Data.Models;
 using BudgetApp.ViewModels.Expenses;
 using BudgetApp.ViewModels.Expenses.Input;
 using BudgetApp.ViewModels.Expenses.Output;
@@ -27,22 +28,8 @@ namespace BudgetApp.Services.Expenses
             if (model.CategoryId.HasValue)
                 query = query.Where(e => e.CategoryId == model.CategoryId);
 
-            query = model.Order switch
-            {
-                ExpenseOrder.ByValue => query.OrderByDescending(e => (float) e.Value),
-                ExpenseOrder.ByDateAscending => query.OrderBy(e => e.DateTime),
-                ExpenseOrder.ByDateDescending => query.OrderByDescending(e => e.DateTime),
-                _ => throw new Exception("Nieznany porządek wydatków")
-            };
-
-            query = model.TimeSpan switch
-            {
-                ExpenseTimeSpan.All => query,
-                ExpenseTimeSpan.ThisWeek => query.Where(c => c.DateTime > DateTime.Now.AddDays(-7)),
-                ExpenseTimeSpan.ThisMonth => query.Where(c => c.DateTime > DateTime.Now.AddDays(-30)),
-                ExpenseTimeSpan.ThisYear => query.Where(c => c.DateTime > DateTime.Now.AddDays(-365)),
-                _ => throw new Exception("Nieznany okres wydatków")
-            };
+            query = ApplyOrderCriteriion(query, model.Order);
+            query = ApplyTimeSpanCriterion(query, model.TimeSpan);
 
             return query
                 .Skip((model.PageNumber - 1) * model.PageSize)
@@ -71,6 +58,48 @@ namespace BudgetApp.Services.Expenses
                     DateTime = e.DateTime,
                     CategoryId = e.CategoryId,
                 }).FirstOrDefault();
+        }
+
+        public List<ExpenseStructureItemViewModel> GetStructure(ExpenseTimeSpan timeSpan)
+        {
+            var query = _db.Expenses
+                .Where(e => e.UserId == _currentUser.Id);
+
+            query = ApplyTimeSpanCriterion(query, timeSpan);
+
+            var chartItems = query.GroupBy(e => e.Category.Name)
+                .Select(g => new ExpenseStructureItemViewModel
+                {
+                    CategoryName = g.Key,
+                    TotalValue = (int) g.Sum(e => (float) e.Value)
+                })
+                .OrderByDescending(i => i.TotalValue)
+                .ToList();
+
+            return chartItems;
+        }
+
+        private IQueryable<Expense> ApplyTimeSpanCriterion(IQueryable<Expense> query, ExpenseTimeSpan timeSpan)
+        {
+            return timeSpan switch
+            {
+                ExpenseTimeSpan.All => query,
+                ExpenseTimeSpan.ThisWeek => query.Where(c => c.DateTime > DateTime.Now.AddDays(-7)),
+                ExpenseTimeSpan.ThisMonth => query.Where(c => c.DateTime > DateTime.Now.AddDays(-30)),
+                ExpenseTimeSpan.ThisYear => query.Where(c => c.DateTime > DateTime.Now.AddDays(-365)),
+                _ => throw new Exception("Nieznany okres wydatków")
+            };
+        }
+        
+        private IQueryable<Expense> ApplyOrderCriteriion(IQueryable<Expense> query, ExpenseOrder order)
+        {
+            return order switch
+            {
+                ExpenseOrder.ByValue => query.OrderByDescending(e => (float) e.Value),
+                ExpenseOrder.ByDateAscending => query.OrderBy(e => e.DateTime),
+                ExpenseOrder.ByDateDescending => query.OrderByDescending(e => e.DateTime),
+                _ => throw new Exception("Nieznany porządek wydatków")
+            };
         }
     }
 }

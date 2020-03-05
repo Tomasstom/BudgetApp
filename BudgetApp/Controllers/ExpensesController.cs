@@ -1,6 +1,7 @@
 ﻿using BudgetApp.Infrastructure.Web.Filters;
 using BudgetApp.Services.Categories;
 using BudgetApp.Services.Expenses;
+using BudgetApp.ViewModels.Expenses;
 using BudgetApp.ViewModels.Expenses.Input;
 using BudgetApp.ViewModels.Expenses.Output;
 using Microsoft.AspNetCore.Authorization;
@@ -88,6 +89,18 @@ namespace BudgetApp.Controllers
             var result = _expenseStore.Remove(expenseId);
 
             return MapToResponse(result, NoContent);
+        }
+
+        [HttpGet("structure")]
+        public IActionResult Structure(ExpenseTimeSpan timeSpan)
+        {
+            var items = _expenseReader.GetStructure(timeSpan);
+            
+            return View(new ExpenseStructureChartViewModel
+            {
+                TimeSpan = timeSpan,
+                Items = items
+            });
         }
     }
 }

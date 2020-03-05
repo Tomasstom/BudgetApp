@@ -88,6 +88,10 @@
 <a class="btn btn-primary" asp-controller="Expenses" asp-action="Add">
     <i class="material-icons">create</i> Nowy wydatek
 </a>
+<a class="btn btn-secondary ml-sm-2" asp-action="Structure" asp-route-timeSpan="@(Model.TimeSpan)">
+    <i class="material-icons">pie_chart</i> Struktura
+</a>
+
 <a class="btn ml-sm-2" asp-controller="Categories" asp-action="List">Kategorie</a>
 
 @Html.AntiForgeryToken()
