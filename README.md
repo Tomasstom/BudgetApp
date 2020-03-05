@@ -7,4 +7,4 @@ Projekt zespołowy
 
 ![Uruchomienie](/docs/instruction.PNG)
 ![Wydatki](/docs/expenses.PNG)
-
+![Wykres](/docs/chart.PNG)
