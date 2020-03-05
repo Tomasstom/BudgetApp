@@ -67,7 +67,7 @@ namespace BudgetApp.Services.Expenses
                 {
                     ExpenseId = e.Id,
                     Name = e.Name,
-                    Value = e.Value,
+                    Value = e.Value.ToString("0.00"),
                     DateTime = e.DateTime,
                     CategoryId = e.CategoryId,
                 }).FirstOrDefault();

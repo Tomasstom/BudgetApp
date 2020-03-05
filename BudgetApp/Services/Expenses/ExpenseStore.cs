@@ -31,7 +31,7 @@ namespace BudgetApp.Services.Expenses
             var expense = new Expense
             {
                 Name = model.Name,
-                Value = model.Value,
+                Value = decimal.Parse(model.Value),
                 DateTime = model.DateTime ?? DateTime.UtcNow,
                 UserId = _currentUser.Id,
                 CategoryId = category.Id
@@ -61,7 +61,7 @@ namespace BudgetApp.Services.Expenses
                 return Result.NotValid("Ta kategoria nie należy do Ciebie.");
 
             expense.Name = model.Name;
-            expense.Value = model.Value;
+            expense.Value = decimal.Parse(model.Value);
             expense.DateTime = model.DateTime ?? DateTime.UtcNow;
             expense.CategoryId = category.Id;
 

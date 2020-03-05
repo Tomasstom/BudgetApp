@@ -12,8 +12,9 @@ namespace BudgetApp.ViewModels.Expenses.Input
         public string Name { get; set; }
         
         [Display(Name = "Wartość")]
+        [Required(ErrorMessage = "Wartość nie może pozostać pusta.")]
         [RegularExpression("\\d+((\\.|,)\\d{2})?", ErrorMessage = "Wartość nie jest poprawna.")]
-        public decimal Value { get; set; }
+        public string Value { get; set; }
         
         [Display(Name = "Kategoria")]
         public int CategoryId { get; set; }
