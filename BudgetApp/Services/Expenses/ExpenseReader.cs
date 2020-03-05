@@ -29,7 +29,7 @@ namespace BudgetApp.Services.Expenses
 
             query = model.Order switch
             {
-                ExpenseOrder.ByValue => query.OrderByDescending(e => e.Value),
+                ExpenseOrder.ByValue => query.OrderByDescending(e => (float) e.Value),
                 ExpenseOrder.ByDateAscending => query.OrderBy(e => e.DateTime),
                 ExpenseOrder.ByDateDescending => query.OrderByDescending(e => e.DateTime),
                 _ => throw new Exception("Nieznany porządek wydatków")
